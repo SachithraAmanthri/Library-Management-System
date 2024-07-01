@@ -1,0 +1,373 @@
+using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static List<Book> books = new List<Book>();
+    static List<Member> members = new List<Member>();
+    static List<Lending> lendings = new List<Lending>();
+
+    static void Main()
+    {
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("Library Management System:");
+            Console.WriteLine("1. Add a new Book:");
+            Console.WriteLine("2. Registration:");
+            Console.WriteLine("3. Remove a book from the system:");
+            Console.WriteLine("4. Remove a member from the system:");
+            Console.WriteLine("5. Search a Book:");
+            Console.WriteLine("6. Search Member Information:");
+            Console.WriteLine("7. Display Book Names:");
+            Console.WriteLine("8. Display Member Names:");
+            Console.WriteLine("9. Lend Book:");
+            Console.WriteLine("10. Return Book:");
+            Console.WriteLine("11. View Lending Information:");
+            Console.WriteLine("12. Display Overdue Books:");
+            Console.WriteLine("0. Exit: ");
+
+            Console.Write("Enter the number of your choice: ");
+            int choice = int.Parse(Console.ReadLine());
+
+            switch (choice)
+            {
+                case 1:
+                    AddBook();
+                    break;
+                case 2:
+                    RegisterMember();
+                    break;
+                case 3:
+                    RemoveBook();
+                    break;
+                case 4:
+                    RemoveMember();
+                    break;
+                case 5:
+                    SearchBookInfo();
+                    break;
+                case 6:
+                    SearchMemberInfo();
+                    break;
+                case 7:
+                    DisplayBookNames();
+                    break;
+                case 8:
+                    DisplayMemberNames();
+                    break;
+                case 9:
+                    LendBook();
+                    break;
+                case 10:
+                    ReturnBook();
+                    break;
+                case 11:
+                    ViewLendingInfo();
+                    break;
+                case 12:
+                    DisplayOverdueBooks();
+                    break;
+                case 0:
+                    Environment.Exit(0);
+                    break;
+                default:
+                    Console.WriteLine("Invalid choice. Please try again.");
+                    break;
+            }
+
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+        }
+    }
+
+    class Book
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public bool IsAvailable { get; set; }
+    }
+
+    class Member
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    class Lending
+    {
+        public int BookId { get; set; }
+        public int MemberId { get; set; }
+        public DateTime DueDate { get; set; }
+        public int Fine { get; set; }
+    }
+
+    static void AddBook()
+    {
+        Console.Write("Enter Book Title: ");
+        string title = Console.ReadLine();
+        int bookId = books.Count + 1;
+
+        books.Add(new Book { Id = bookId, Title = title, IsAvailable = true });
+
+        Console.WriteLine("Book added successfully. Book ID: " + bookId);
+    }
+
+    static void RegisterMember()
+    {
+        Console.Write("Enter Member Name: ");
+        string name = Console.ReadLine();
+        int memberId = members.Count + 1;
+
+        members.Add(new Member { Id = memberId, Name = name });
+
+        Console.WriteLine("Member registered successfully. Member ID: " + memberId);
+    }
+
+    static void RemoveBook()
+    {
+        Console.Write("Enter Book ID to remove: ");
+        int bookIdToRemove = int.Parse(Console.ReadLine());
+
+        if (IsBookLent(bookIdToRemove))
+        {
+            Console.WriteLine("Cannot remove the book because it is currently lent.");
+        }
+        else
+        {
+            Book bookToRemove = books.Find(b => b.Id == bookIdToRemove);
+
+            if (bookToRemove != null)
+            {
+                books.Remove(bookToRemove);
+                Console.WriteLine("Book removed successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Book not found.");
+            }
+        }
+    }
+
+    static void RemoveMember()
+    {
+        Console.Write("Enter Member ID to remove: ");
+        int memberIdToRemove = int.Parse(Console.ReadLine());
+
+        if (IsMemberLendingBooks(memberIdToRemove))
+        {
+            Console.WriteLine("Cannot remove the member because they have books currently lent.");
+        }
+        else
+        {
+            Member memberToRemove = members.Find(m => m.Id == memberIdToRemove);
+
+            if (memberToRemove != null)
+            {
+                members.Remove(memberToRemove);
+                Console.WriteLine("Member removed successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Member not found.");
+            }
+        }
+    }
+
+    static bool IsBookLent(int bookId)
+    {
+        return lendings.Exists(l => l.BookId == bookId);
+    }
+
+    static bool IsMemberLendingBooks(int memberId)
+    {
+        return lendings.Exists(l => l.MemberId == memberId);
+    }
+
+    static void SearchBookInfo()
+    {
+        Console.Write("Enter Book ID to search: ");
+        int bookIdToSearch = int.Parse(Console.ReadLine());
+
+        Book book = books.Find(b => b.Id == bookIdToSearch);
+
+        if (book != null)
+        {
+            Console.WriteLine("Book ID: " + book.Id);
+            Console.WriteLine("Title: " + book.Title);
+            Console.WriteLine("Available: " + (book.IsAvailable ? "Yes" : "No"));
+        }
+        else
+        {
+            Console.WriteLine("Book not found.");
+        }
+    }
+
+    static void SearchMemberInfo()
+    {
+        Console.Write("Enter Member ID to search: ");
+        int memberIdToSearch = int.Parse(Console.ReadLine());
+
+        Member member = members.Find(m => m.Id == memberIdToSearch);
+
+        if (member != null)
+        {
+            Console.WriteLine("Member ID: " + member.Id);
+            Console.WriteLine("Name: " + member.Name);
+        }
+        else
+        {
+            Console.WriteLine("Member not found.");
+        }
+    }
+
+    static void DisplayBookNames()
+    {
+        Console.WriteLine("Book Names:");
+        foreach (var book in books)
+        {
+            Console.WriteLine("ID: " + book.Id + ", Title: " + book.Title);
+        }
+    }
+
+    static void DisplayMemberNames()
+    {
+        Console.WriteLine("Member Names:");
+        foreach (var member in members)
+        {
+            Console.WriteLine("ID: " + member.Id + ", Name: " + member.Name);
+        }
+    }
+
+    static void LendBook()
+    {
+        Console.Write("Enter Book ID to lend: ");
+        int bookIdToLend = int.Parse(Console.ReadLine());
+
+        Console.Write("Enter Member ID who will lend the book: ");
+        int memberIdWhoLends = int.Parse(Console.ReadLine());
+
+        Book bookToLend = books.Find(b => b.Id == bookIdToLend);
+        Member lendingMember = members.Find(m => m.Id == memberIdWhoLends);
+
+        if (bookToLend != null && lendingMember != null && bookToLend.IsAvailable)
+        {
+            bookToLend.IsAvailable = false;
+
+            DateTime dueDate = DateTime.Now.AddDays(14); // 14 days loan period
+
+            lendings.Add(new Lending
+            {
+                BookId = bookIdToLend,
+                MemberId = memberIdWhoLends,
+                DueDate = dueDate,
+                Fine = 0 // Initialize fine as 0
+            });
+
+            Console.WriteLine("Book lent successfully. Due Date: " + dueDate.ToShortDateString());
+        }
+        else
+        {
+            Console.WriteLine("Book not available or member not found.");
+        }
+    }
+
+    static void ReturnBook()
+    {
+        Console.Write("Enter Book ID to return: ");
+        int bookIdToReturn = int.Parse(Console.ReadLine());
+
+        Lending lending = lendings.Find(l => l.BookId == bookIdToReturn);
+
+        if (lending != null)
+        {
+            Book book = books.Find(b => b.Id == bookIdToReturn);
+            if (book != null)
+            {
+                book.IsAvailable = true;
+            }
+
+            lendings.Remove(lending);
+
+            // Calculate fine
+            DateTime currentDate = DateTime.Now;
+            TimeSpan overdueDuration = currentDate - lending.DueDate;
+            int overdueDays = (int)overdueDuration.TotalDays;
+
+            if (overdueDays > 0)
+            {
+                int fine = 0;
+
+                if (overdueDays <= 7)
+                {
+                    fine = overdueDays * 50; // Rs. 50 per additional day for up to 7 days
+                }
+                else
+                {
+                    fine = (7 * 50) + ((overdueDays - 7) * 100); // Rs. 50 for the first 7 days, Rs. 100 per additional day after 7 days
+                }
+
+                lending.Fine = fine;
+                Console.WriteLine("Fine calculated: Rs. " + fine);
+            }
+
+            Console.WriteLine("Book returned successfully.");
+        }
+        else
+        {
+            Console.WriteLine("Book not found or not currently on loan.");
+        }
+    }
+
+    static void ViewLendingInfo()
+    {
+        Console.WriteLine("Lending Information:");
+        foreach (var lending in lendings)
+        {
+            Book book = books.Find(b => b.Id == lending.BookId);
+            Member member = members.Find(m => m.Id == lending.MemberId);
+
+            Console.WriteLine("Book: " + book.Title);
+            Console.WriteLine("Member: " + member.Name);
+            Console.WriteLine("Due Date: " + lending.DueDate.ToShortDateString());
+            Console.WriteLine("Fine: Rs. " + lending.Fine);
+            Console.WriteLine();
+        }
+    }
+
+    static void DisplayOverdueBooks()
+    {
+        DateTime currentDate = DateTime.Now;
+
+        Console.WriteLine("Overdue Books:");
+        foreach (var lending in lendings)
+        {
+            if (lending.DueDate < currentDate && lending.Fine == 0)
+            {
+                Book book = books.Find(b => b.Id == lending.BookId);
+                Member member = members.Find(m => m.Id == lending.MemberId);
+
+                Console.WriteLine("Book: " + book.Title);
+                Console.WriteLine("Member: " + member.Name);
+                Console.WriteLine("Due Date: " + lending.DueDate.ToShortDateString());
+
+                TimeSpan overdueDuration = currentDate - lending.DueDate;
+                int overdueDays = (int)overdueDuration.TotalDays;
+
+                int fine = 0;
+                if (overdueDays <= 7)
+                {
+                    fine = overdueDays * 50; // Rs. 50 per additional day for up to 7 days
+                }
+                else
+                {
+                    fine = (7 * 50) + ((overdueDays - 7) * 100); // Rs. 50 for the first 7 days, Rs. 100 per additional day after 7 days
+                }
+
+                lending.Fine = fine;
+                Console.WriteLine("Fine: Rs. " + fine);
+                Console.WriteLine();
+            }
+        }
+    }
+}
